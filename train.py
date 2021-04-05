@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
+from torch.utils.tensorboard import SummaryWriter
 
 from tqdm import tqdm
 
@@ -76,6 +77,8 @@ if __name__ == '__main__':
     valid_dataset = MaskDataset(train=False)
     valid_loader = DataLoader(valid_dataset, batch_size=BATCH_SIZE, num_workers=NUM_WORKERS, shuffle=True)
 
+    logger = SummaryWriter()
+
     best_valid_acc = 0
     fails = 0
     for epoch in range(NUM_EPOCHS):
@@ -85,7 +88,7 @@ if __name__ == '__main__':
         train(model, train_loader)
 
         print('validation')
-        train_acc, _ = evaluate(model, train_loader)
+        train_acc, train_loss = evaluate(model, train_loader)
         valid_acc, valid_loss = evaluate(model, valid_loader)
         if best_valid_acc < valid_acc:
             best_valid_acc = valid_acc
@@ -94,6 +97,11 @@ if __name__ == '__main__':
         else:
             fails += 1
         print(f'train_acc: {train_acc * 100} | valid_acc: {valid_acc * 100} | best_valid_acc: {best_valid_acc * 100} | fails: {fails}/{TOLERENCE}')
+
+        logger.add_scalar("train loss", train_loss, epoch)
+        logger.add_scalar("train acc", train_acc, epoch)
+        logger.add_scalar("valid loss", valid_loss, epoch)
+        logger.add_scalar("valid acc", valid_acc, epoch)
 
         if fails >= TOLERENCE:
             break
