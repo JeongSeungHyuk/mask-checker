@@ -11,6 +11,7 @@ from tqdm import tqdm
 
 from dataset import MaskDataset
 from model import MaskChecker
+from loss import *
 
 
 DEVICE = torch.device('cuda:0')
@@ -20,7 +21,7 @@ NUM_EPOCHS = 30
 TOLERENCE = 5
 BATCH_SIZE = 16
 
-MODEL = 'resnet34'
+MODEL = 'resnet18'
 LEARNING_RATE = 3e-4
 
 
@@ -99,7 +100,7 @@ if __name__ == '__main__':
     set_random_seed(170516)
 
     model = MaskChecker(MODEL).to(DEVICE)
-    criterion = nn.CrossEntropyLoss()
+    criterion = LabelSmoothingLoss(18, 0.2) #nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', verbose=True)
 
@@ -119,7 +120,7 @@ if __name__ == '__main__':
         train(model, train_loader)
 
         print('validation')
-        train_acc, train_loss = (0, 0)#evaluate(model, train_loader)
+        train_acc, train_loss = evaluate(model, train_loader)
         valid_acc, valid_loss = evaluate(model, valid_loader)
         if best_valid_acc < valid_acc:
             best_valid_acc = valid_acc

@@ -12,13 +12,13 @@ class MaskChecker(nn.Module):
     def __init__(self, model):
         super().__init__()
 
-        self.mask = models.resnet34(pretrained=True)
+        self.mask = models.resnet18(pretrained=True)
         self.mask.fc = nn.Linear(512, 3)
 
-        self.gender = models.resnet34(pretrained=True)
+        self.gender = models.resnet18(pretrained=True)
         self.gender.fc = nn.Linear(512, 2)
 
-        self.age = models.resnet34(pretrained=True)
+        self.age = models.resnet18(pretrained=True)
         self.age.fc = nn.Linear(512, 3)
 
 
