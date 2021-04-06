@@ -37,13 +37,19 @@ def train(model, loader):
 
     for x, y in tqdm(loader):
         x = x.to(DEVICE)
-        y = y.to(DEVICE)
+        y_mask = y[0].to(DEVICE)
+        y_gender = y[1].to(DEVICE)
+        y_age = y[2].to(DEVICE)
 
-        output = model(x)
-        loss = criterion(output, y)
+        out_mask, out_gender, out_age = model(x)
+        loss_mask = criterion(out_mask, y_mask)
+        loss_gender = criterion(out_gender, y_gender)
+        loss_age = criterion(out_age, y_age)
 
         optimizer.zero_grad()
-        loss.backward()
+        loss_mask.backward()
+        loss_gender.backward()
+        loss_age.backward()
         optimizer.step()
 
 
@@ -51,20 +57,35 @@ def evaluate(model, loader, return_loss=True):
     model.eval()
 
     correct = 0
+    correct_mask = 0
+    correct_gender = 0
+    correct_age = 0
     total = 0
     sum_loss = 0
     for x, y in tqdm(loader):
         x = x.to(DEVICE)
-        y = y.to(DEVICE)
+        y_mask = y[0].to(DEVICE)
+        y_gender = y[1].to(DEVICE)
+        y_age = y[2].to(DEVICE)
 
-        output = model(x)
-        _, y_pred = torch.max(output, 1)
+        out_mask, out_gender, out_age = model(x)
+        _, y_mask_pred = torch.max(out_mask, 1)
+        _, y_gender_pred = torch.max(out_gender, 1)
+        _, y_age_pred = torch.max(out_age, 1)
 
-        correct += (y_pred == y).sum().item()
+        for i in range(len(y_mask)):
+            if y_mask_pred[i] == y_mask[i] and y_gender_pred[i] == y_gender[i] and y_age_pred[i] == y_age[i]:
+                correct += 1
+            if y_mask_pred[i] == y_mask[i]:
+                correct_mask += 1
+            if y_gender_pred[i] == y_gender[i]:
+                correct_gender += 1
+            if y_age_pred[i] == y_age[i]:
+                correct_age += 1
         total += len(x)
 
         if return_loss:
-            loss = criterion(output, y)
+            loss = criterion(out_mask, y_mask) + criterion(out_gender, y_gender) + criterion(out_age, y_age)
             sum_loss += loss.item()
 
     acc = correct / total
@@ -98,7 +119,7 @@ if __name__ == '__main__':
         train(model, train_loader)
 
         print('validation')
-        train_acc, train_loss = evaluate(model, train_loader)
+        train_acc, train_loss = (0, 0)#evaluate(model, train_loader)
         valid_acc, valid_loss = evaluate(model, valid_loader)
         if best_valid_acc < valid_acc:
             best_valid_acc = valid_acc

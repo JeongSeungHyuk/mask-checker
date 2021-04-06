@@ -71,12 +71,11 @@ class MaskDataset(Dataset):
             mask = 0
 
         labels = [mask, gender, age]
-        label = (mask * 6) + (gender * 3) + age
 
         image = Image.open(f'{self.paths["images_dir"]}/{data[3]}')
         image = transform(image)
 
-        return image, label
+        return image, labels
 
 
 class MaskTestDataset(Dataset):

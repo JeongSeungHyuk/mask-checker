@@ -20,7 +20,7 @@ NUM_WORKERS = 4
 
 BATCH_SIZE = 16
 
-MODEL_PATH = 'checkpoints/resnet34_lr0.0003_b16_tol5_6.pt'
+MODEL_PATH = 'checkpoints/resnet34_lr0.0003_b16_tol5_1.pt'
 RESULT_PATH = 'submission.csv'
 
 
@@ -46,11 +46,14 @@ result.append(['ImageID', 'ans'])
 for x, path in tqdm(test_loader):
     x = x.to(DEVICE)
 
-    output = model(x)
-    _, y_pred = torch.max(output, 1)
+    out_mask, out_gender, out_age = model(x)
+    _, y_mask_pred = torch.max(out_mask, 1)
+    _, y_gender_pred = torch.max(out_gender, 1)
+    _, y_age_pred = torch.max(out_age, 1)
+    label = (y_mask_pred * 6) + (y_gender_pred * 3) + y_age_pred
 
     for i in range(len(x)):
-        result.append([path[i], y_pred[i].item()])
+        result.append([path[i], label[i].item()])
 
 with open(RESULT_PATH, 'w') as f:
     writer = csv.writer(f)
