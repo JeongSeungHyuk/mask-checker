@@ -12,7 +12,8 @@ from PIL import Image
 
 
 transform = transforms.Compose([
-    #transforms.CenterCrop([400, 200]),
+    #transforms.CenterCrop((384, 384)),
+    #transforms.Resize((224, 224)),
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
 ])
@@ -70,42 +71,7 @@ class MaskDataset(Dataset):
             mask = 0
 
         labels = [mask, gender, age]
-        if labels == [0, 0, 0]:
-            label = 0
-        elif labels == [0, 0, 1]:
-            label = 1
-        elif labels == [0, 0, 2]:
-            label = 2
-        elif labels == [0, 1, 0]:
-            label = 3
-        elif labels == [0, 1, 1]:
-            label = 4
-        elif labels == [0, 1, 2]:
-            label = 5
-        elif labels == [1, 0, 0]:
-            label = 6
-        elif labels == [1, 0, 1]:
-            label = 7
-        elif labels == [1, 0, 2]:
-            label = 8
-        elif labels == [1, 1, 0]:
-            label = 9
-        elif labels == [1, 1, 1]:
-            label = 10
-        elif labels == [1, 1, 2]:
-            label = 11
-        elif labels == [2, 0, 0]:
-            label = 12
-        elif labels == [2, 0, 1]:
-            label = 13
-        elif labels == [2, 0, 2]:
-            label = 14
-        elif labels == [2, 1, 0]:
-            label = 15
-        elif labels == [2, 1, 1]:
-            label = 16
-        elif labels == [2, 1, 2]:
-            label = 17
+        label = (mask * 6) + (gender * 3) + age
 
         image = Image.open(f'{self.paths["images_dir"]}/{data[3]}')
         image = transform(image)

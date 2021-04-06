@@ -3,8 +3,10 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
+from torch.utils.data import WeightedRandomSampler
 from torch.utils.tensorboard import SummaryWriter
 
+from sklearn.model_selection import KFold
 from tqdm import tqdm
 
 from dataset import MaskDataset
@@ -20,6 +22,14 @@ BATCH_SIZE = 16
 
 MODEL = 'resnet34'
 LEARNING_RATE = 3e-4
+
+
+def set_random_seed(seed):
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
 
 
 def train(model, loader):
@@ -65,7 +75,7 @@ def evaluate(model, loader, return_loss=True):
 
 
 if __name__ == '__main__':
-    torch.manual_seed(170516)
+    set_random_seed(170516)
 
     model = MaskChecker(MODEL).to(DEVICE)
     criterion = nn.CrossEntropyLoss()
@@ -77,7 +87,7 @@ if __name__ == '__main__':
     valid_dataset = MaskDataset(train=False)
     valid_loader = DataLoader(valid_dataset, batch_size=BATCH_SIZE, num_workers=NUM_WORKERS, shuffle=True)
 
-    logger = SummaryWriter()
+    logger = SummaryWriter(log_dir='logs')
 
     best_valid_acc = 0
     fails = 0
