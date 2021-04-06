@@ -20,7 +20,7 @@ NUM_WORKERS = 4
 
 BATCH_SIZE = 16
 
-MODEL_PATH = 'checkpoints/resnet34_lr0.0003_b16_tol5_6.pt'
+MODEL_PATH = 'checkpoints/resnet34_lr0.0003_b16_tol5_2.pt'
 RESULT_PATH = 'submission.csv'
 
 

@@ -11,6 +11,7 @@ from tqdm import tqdm
 
 from dataset import MaskDataset
 from model import MaskChecker
+from loss import *
 
 
 DEVICE = torch.device('cuda:0')
@@ -78,7 +79,7 @@ if __name__ == '__main__':
     set_random_seed(170516)
 
     model = MaskChecker(MODEL).to(DEVICE)
-    criterion = nn.CrossEntropyLoss()
+    criterion = LabelSmoothingLoss(18, 0.2) #nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', verbose=True)
 
