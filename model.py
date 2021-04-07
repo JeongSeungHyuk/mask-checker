@@ -20,7 +20,7 @@ class MaskChecker(nn.Module):
             self.backbone.fc = nn.Linear(512, 18)
         elif model == 'resnet50':
             self.backbone = models.resnet50(pretrained=True)
-            self.backbone.fc = nn.Linear(512, 18)
+            self.backbone.fc = nn.Linear(2048, 18)
         elif model == 'effnetb0':
             self.backbone = EfficientNet.from_pretrained('efficientnet-b0')
             self.backbone._fc = nn.Linear(1280, 18)

@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
+import torch.cuda.amp as amp
 from torch.utils.data import DataLoader
 from torch.utils.data import WeightedRandomSampler
 from torch.utils.tensorboard import SummaryWriter
@@ -40,8 +41,9 @@ def train(model, loader):
         x = x.to(DEVICE)
         y = y.to(DEVICE)
 
-        output = model(x)
-        loss = criterion(output, y)
+        with amp.autocast():
+            output = model(x)
+            loss = criterion(output, y)
 
         optimizer.zero_grad()
         loss.backward()
@@ -58,8 +60,9 @@ def evaluate(model, loader, return_loss=True):
         x = x.to(DEVICE)
         y = y.to(DEVICE)
 
-        output = model(x)
-        _, y_pred = torch.max(output, 1)
+        with amp.autocast():
+            output = model(x)
+            _, y_pred = torch.max(output, 1)
 
         correct += (y_pred == y).sum().item()
         total += len(x)
